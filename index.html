@@ -1,0 +1,1387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font:
+          14px -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #faf9f5;
+        color: #141413;
+      }
+      img {
+        max-width: 100%;
+      }
+      [hidden]:not([hidden="until-found" i]) {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <title>Stacks and Trees Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <style>
+      /* Layout: one centered study column; a question rail on top, one question card at a time, results replace the card at the end. */
+      :root {
+        --bg: #f3f5f8;
+        --surface: #ffffff;
+        --surface-2: #eaeef3;
+        --ink: #18202c;
+        --muted: #566174;
+        --line: #d3dae4;
+        --accent: #2152a3;
+        --accent-ink: #ffffff;
+        --accent-soft: #e1e9f7;
+        --ok: #1d7543;
+        --ok-bg: #e2f2e8;
+        --bad: #b03528;
+        --bad-bg: #fbe6e2;
+        --part: #915f00;
+        --part-bg: #fbefd6;
+        --code-bg: #edf0f5;
+        --node: #dce7f7;
+        --node-new: #fbefd6;
+        --f-display:
+          "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui,
+          sans-serif;
+        --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+        --f-mono:
+          "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #0f141b;
+          --surface: #171e28;
+          --surface-2: #1f2834;
+          --ink: #e5eaf1;
+          --muted: #9aa6b7;
+          --line: #2c3745;
+          --accent: #86aef2;
+          --accent-ink: #0c1320;
+          --accent-soft: #1c2a42;
+          --ok: #63c58f;
+          --ok-bg: #12281b;
+          --bad: #f08c80;
+          --bad-bg: #331815;
+          --part: #e3b45a;
+          --part-bg: #2e2410;
+          --code-bg: #121922;
+          --node: #1e2d45;
+          --node-new: #3a2c10;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #0f141b;
+        --surface: #171e28;
+        --surface-2: #1f2834;
+        --ink: #e5eaf1;
+        --muted: #9aa6b7;
+        --line: #2c3745;
+        --accent: #86aef2;
+        --accent-ink: #0c1320;
+        --accent-soft: #1c2a42;
+        --ok: #63c58f;
+        --ok-bg: #12281b;
+        --bad: #f08c80;
+        --bad-bg: #331815;
+        --part: #e3b45a;
+        --part-bg: #2e2410;
+        --code-bg: #121922;
+        --node: #1e2d45;
+        --node-new: #3a2c10;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--f-body);
+        font-size: 17px;
+        line-height: 1.55;
+        padding-inline: 16px;
+        padding-block: 28px 64px;
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        display: grid;
+        gap: 22px;
+      }
+
+      header {
+        display: grid;
+        gap: 6px;
+      }
+      .eyebrow {
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      h1 {
+        font-family: var(--f-display);
+        font-weight: 800;
+        font-size: clamp(30px, 6vw, 42px);
+        line-height: 1.05;
+        margin: 0;
+        text-wrap: balance;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        color: var(--muted);
+        font-size: 15px;
+        align-items: center;
+      }
+      .meta b {
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .rail {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        font: 600 15px/1 var(--f-mono);
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1.5px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+      }
+      .chip[aria-current="true"] {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-soft);
+      }
+      .chip.ok {
+        background: var(--ok-bg);
+        border-color: var(--ok);
+        color: var(--ok);
+      }
+      .chip.bad {
+        background: var(--bad-bg);
+        border-color: var(--bad);
+        color: var(--bad);
+      }
+      .chip.part {
+        background: var(--part-bg);
+        border-color: var(--part);
+        color: var(--part);
+      }
+      .chip.answered {
+        background: var(--accent-soft);
+      }
+      .chip.results {
+        width: auto;
+        padding: 0 14px;
+        font-family: var(--f-body);
+        font-weight: 700;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .qhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        background: var(--surface-2);
+        border-bottom: 1px solid var(--line);
+        flex-wrap: wrap;
+      }
+      .qhead h2 {
+        font-family: var(--f-display);
+        font-weight: 600;
+        font-size: 22px;
+        margin: 0;
+      }
+      .qmeta {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .topic {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .pill {
+        font-size: 13px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 999px;
+      }
+      .pill.ok {
+        background: var(--ok-bg);
+        color: var(--ok);
+      }
+      .pill.bad {
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+      .pill.part {
+        background: var(--part-bg);
+        color: var(--part);
+      }
+      .pill.wait {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .qbody {
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+        min-width: 0;
+      }
+      .qbody p {
+        margin: 0;
+      }
+
+      pre.code {
+        margin: 0;
+        background: var(--code-bg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        font: 14px/1.5 var(--f-mono);
+        overflow-x: auto;
+        color: var(--ink);
+      }
+      code {
+        font-family: var(--f-mono);
+        font-size: 0.9em;
+        background: var(--code-bg);
+        padding: 1px 5px;
+        border-radius: 5px;
+      }
+
+      .opts {
+        display: grid;
+        gap: 8px;
+      }
+      .opt {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 12px 14px;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        cursor: pointer;
+        background: var(--surface);
+      }
+      .opt:hover {
+        border-color: var(--accent);
+      }
+      .opt input {
+        margin-top: 4px;
+        accent-color: var(--accent);
+        width: 18px;
+        height: 18px;
+        flex: none;
+      }
+      .opt.correct {
+        border-color: var(--ok);
+        background: var(--ok-bg);
+      }
+      .opt.wrong {
+        border-color: var(--bad);
+        background: var(--bad-bg);
+      }
+      .opt .tag {
+        margin-left: auto;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .opt.correct .tag {
+        color: var(--ok);
+      }
+      .opt.wrong .tag {
+        color: var(--bad);
+      }
+      .locked .opt {
+        cursor: default;
+      }
+      .locked .opt:hover {
+        border-color: var(--line);
+      }
+      .locked .opt.correct:hover {
+        border-color: var(--ok);
+      }
+      .locked .opt.wrong:hover {
+        border-color: var(--bad);
+      }
+
+      .field {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .field label {
+        font-weight: 700;
+        min-width: 92px;
+      }
+      input[type="text"],
+      select,
+      textarea {
+        font: 15px var(--f-mono);
+        color: var(--ink);
+        background: var(--surface);
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        padding: 9px 11px;
+      }
+      input[type="text"] {
+        width: min(260px, 100%);
+      }
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible,
+      button:focus-visible,
+      .opt:focus-within {
+        outline: 3px solid var(--accent-soft);
+        outline-offset: 1px;
+        border-color: var(--accent);
+      }
+      input.correct,
+      select.correct {
+        border-color: var(--ok);
+        background: var(--ok-bg);
+      }
+      input.wrong,
+      select.wrong {
+        border-color: var(--bad);
+        background: var(--bad-bg);
+      }
+      .fix {
+        font: 14px var(--f-mono);
+        color: var(--ok);
+      }
+      textarea {
+        width: 100%;
+        min-height: 260px;
+        line-height: 1.5;
+        resize: vertical;
+        tab-size: 4;
+      }
+
+      .match {
+        display: grid;
+        gap: 10px;
+      }
+      .mrow {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 12px;
+        align-items: center;
+      }
+      .mrow select {
+        width: 100%;
+      }
+      @media (max-width: 560px) {
+        .mrow {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
+
+      .tree {
+        display: flex;
+        justify-content: center;
+      }
+      .tree svg {
+        max-width: 100%;
+        height: auto;
+      }
+      .tree line {
+        stroke: var(--muted);
+        stroke-width: 1.6;
+      }
+      .tree circle {
+        fill: var(--node);
+        stroke: var(--accent);
+        stroke-width: 1.6;
+      }
+      .tree circle.new {
+        fill: var(--node-new);
+        stroke: var(--part);
+        stroke-dasharray: 4 3;
+      }
+      .tree text {
+        fill: var(--ink);
+        font: 700 15px var(--f-body);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .actions .spacer {
+        flex: 1;
+      }
+      button {
+        font: 700 15px var(--f-body);
+        border-radius: 10px;
+        padding: 10px 18px;
+        cursor: pointer;
+        border: 1.5px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-ink);
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .hint {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .feedback {
+        border-top: 1px solid var(--line);
+        padding: 18px 20px 20px;
+        display: grid;
+        gap: 12px;
+        background: var(--accent-soft);
+        min-width: 0;
+      }
+      .feedback h3 {
+        margin: 0;
+        font-family: var(--f-display);
+        font-weight: 600;
+        font-size: 19px;
+      }
+      .feedback h3.ok {
+        color: var(--ok);
+      }
+      .feedback h3.bad {
+        color: var(--bad);
+      }
+      .feedback h3.part {
+        color: var(--part);
+      }
+      .feedback p {
+        margin: 0;
+      }
+      .feedback pre.code {
+        background: var(--surface);
+      }
+      .answer-line {
+        font-weight: 700;
+      }
+
+      .stepper {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+      }
+      .stepper .row {
+        display: flex;
+        gap: 18px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+      .stack {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 4px;
+        min-width: 84px;
+        min-height: 150px;
+        justify-content: flex-start;
+        border: 2px solid var(--muted);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        padding: 6px;
+      }
+      .box {
+        font: 600 16px var(--f-mono);
+        text-align: center;
+        padding: 6px 0;
+        border-radius: 6px;
+        background: var(--node);
+        border: 1.5px solid var(--accent);
+        position: relative;
+      }
+      .box.top::after {
+        content: "← top";
+        position: absolute;
+        left: calc(100% + 10px);
+        top: 50%;
+        transform: translateY(-50%);
+        font: 700 12px var(--f-body);
+        color: var(--accent);
+        white-space: nowrap;
+      }
+      .box.fresh {
+        animation: drop 0.25s ease-out;
+      }
+      @keyframes drop {
+        from {
+          transform: translateY(-12px);
+          opacity: 0.2;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .box.fresh {
+          animation: none;
+        }
+      }
+      .stepinfo {
+        display: grid;
+        gap: 6px;
+        min-width: 0;
+        flex: 1;
+        padding-left: 44px;
+      }
+      .stepinfo .op {
+        font: 600 15px var(--f-mono);
+      }
+      .stepinfo .out {
+        font-size: 15px;
+      }
+      .stepinfo .out b {
+        font-family: var(--f-mono);
+      }
+      .stepinfo .count {
+        font-size: 13px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .stepper .actions button {
+        padding: 7px 14px;
+        font-size: 14px;
+      }
+
+      .checklist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 4px;
+        font-size: 15px;
+      }
+      .checklist li::before {
+        content: "– ";
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .checklist li.hit::before {
+        content: "✓ ";
+        color: var(--ok);
+      }
+      .selfscore {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .selfscore button[aria-pressed="true"] {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-color: var(--accent);
+      }
+
+      .results {
+        padding: 24px 20px;
+        display: grid;
+        gap: 18px;
+      }
+      .big {
+        font-family: var(--f-display);
+        font-weight: 800;
+        font-size: clamp(44px, 10vw, 64px);
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .big small {
+        font-size: 0.4em;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .rlist {
+        display: grid;
+        gap: 6px;
+      }
+      .ritem {
+        display: grid;
+        grid-template-columns: 110px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .ritem .t {
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .ritem .p {
+        font: 600 14px var(--f-mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .ritem button {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+      @media (max-width: 560px) {
+        .ritem {
+          grid-template-columns: minmax(0, 1fr) auto;
+        }
+        .ritem .t {
+          grid-column: 1 / -1;
+          order: 3;
+        }
+      }
+    </style>
+
+    <div class="wrap">
+      <header>
+        <div class="eyebrow">Data Structures · Quiz 3 practice</div>
+        <h1>Stacks &amp; Binary Trees</h1>
+        <div class="meta">
+          <span>9 questions · 10 points</span
+          ><span
+            >Score so far: <b id="scoreSoFar">0</b> /
+            <b id="scorePossible">0</b> checked</span
+          >
+        </div>
+      </header>
+      <nav class="rail" id="rail" aria-label="Questions"></nav>
+      <main class="card" id="card"></main>
+    </div>
+
+    <script>
+      const esc = (s) =>
+        String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      const pre = (s) => `<pre class="code">${esc(s.trim())}</pre>`;
+      const c = (s) => `<code>${esc(s)}</code>`;
+
+      function treeSVG(withNew) {
+        const pos = {
+          10: [200, 30],
+          7: [110, 95],
+          12: [290, 95],
+          5: [60, 160],
+          8: [160, 160],
+          11: [240, 160],
+          13: [340, 160],
+        };
+        const edges = [
+          [10, 7],
+          [10, 12],
+          [7, 5],
+          [7, 8],
+          [12, 11],
+          [12, 13],
+        ];
+        if (withNew) {
+          pos[6] = [90, 222];
+          pos[9] = [190, 222];
+          edges.push([5, 6], [8, 9]);
+        }
+        const h = withNew ? 250 : 190;
+        let s = `<svg viewBox="0 0 400 ${h}" width="400" role="img" aria-label="Binary search tree with root 10${withNew ? ", after inserting 6 and 9" : ""}">`;
+        for (const [a, b] of edges)
+          s += `<line x1="${pos[a][0]}" y1="${pos[a][1]}" x2="${pos[b][0]}" y2="${pos[b][1]}"/>`;
+        for (const k in pos) {
+          const isNew = withNew && (k === "6" || k === "9");
+          s += `<circle cx="${pos[k][0]}" cy="${pos[k][1]}" r="19" class="${isNew ? "new" : ""}"/><text x="${pos[k][0]}" y="${pos[k][1]}">${k}</text>`;
+        }
+        return `<div class="tree">${s}</svg></div>`;
+      }
+
+      const STACK_ARRAY = `
+template <typename T, int capacity>
+class StackArray {
+private:
+    T data[capacity];
+    int top_idx;          // starts at -1 (empty stack)
+public:
+    StackArray() { top_idx = -1; }
+    bool empty() const { return top_idx == -1; }
+    bool full() const  { return top_idx == capacity - 1; }
+    void push(const T& val);
+    T pop();
+    T& top();
+};`;
+
+      const Q = [
+        {
+          type: "mc",
+          pts: 1,
+          topic: "Stack basics",
+          prompt: `<p>A stack is a data structure in which the elements are ____.</p>`,
+          options: [
+            "added to the rear and removed from the front",
+            "added to and removed from the top",
+            "added to the top and removed from the bottom",
+            "added and removed in the middle",
+          ],
+          answer: 1,
+          explain: `<p>A stack is <b>Last In, First Out (LIFO)</b>, like a stack of plates. You put a plate on the top, and you take a plate off the top.</p>
+              <p>The first choice describes a <i>queue</i>, which is first in, first out.</p>`,
+        },
+
+        {
+          type: "mc",
+          pts: 1,
+          topic: "Array implementation",
+          prompt: `${pre(STACK_ARRAY)}<p>Consider the code above. Inside ${c("push")}, what is the effect of this statement?</p>${pre("data[++top_idx] = val;")}`,
+          options: [
+            "Moves top_idx up by one, then stores val in that new slot",
+            "Stores val at the current top_idx, then moves top_idx up by one",
+            "Removes the top element and replaces it with val",
+            "Stores val at index -1 of the array",
+          ],
+          answer: 0,
+          explain: `<p>The ${c("++")} is written <i>before</i> ${c("top_idx")}, so it happens first. An empty stack starts with ${c("top_idx = -1")}. The first push bumps it to 0 and puts the value in slot 0, the next push uses slot 1, and so on.</p>
+              <p>If it were ${c("top_idx++")} (plus signs after), it would use the old index first and write into slot -1 on the first push. That's a bug.</p>`,
+        },
+
+        {
+          type: "text",
+          pts: 1,
+          topic: "push / pop / top",
+          prompt: `<p>What does this code print? (Type it with no spaces.)</p>${pre(`
+Stack s;
+s.push(4);
+s.push(7);
+std::cout << s.top();
+s.pop();
+s.push(1);
+s.push(9);
+s.pop();
+std::cout << s.top();
+s.pop();
+std::cout << s.top();`)}`,
+          accept: ["714"],
+          shown: "714",
+          explain: `<p>Use the step-through below to watch the stack change. The last item pushed is always the first one popped.</p>`,
+          steps: [
+            ["Start: empty stack", [], ""],
+            ["push(4)", [4], ""],
+            ["push(7)", [4, 7], ""],
+            ["cout << top()  → prints 7", [4, 7], "7"],
+            ["pop()  → 7 leaves", [4], "7"],
+            ["push(1)", [4, 1], "7"],
+            ["push(9)", [4, 1, 9], "7"],
+            ["pop()  → 9 leaves", [4, 1], "7"],
+            ["cout << top()  → prints 1", [4, 1], "71"],
+            ["pop()  → 1 leaves", [4], "71"],
+            ["cout << top()  → prints 4", [4], "714"],
+          ],
+        },
+
+        {
+          type: "mc",
+          pts: 1,
+          topic: "Linked-list implementation",
+          prompt: `<p>This ${c("Node")} class is used by a linked-list stack (${c("StackList")}). The first node is ${c("top_node")}.</p>${pre(`
+template <typename T>
+class Node {
+public:
+    T data;
+    Node<T>* next;
+    Node(const T& val, Node<T>* n = nullptr) : data(val), next(n) {}
+};`)}<p>What is the purpose of this function?</p>${pre(`
+template <typename T>
+T StackList<T>::func() {
+    if (empty()) {
+        throw std::out_of_range("Empty Stack");
+    }
+    Node<T>* temp = top_node;
+    T val = temp->data;
+    top_node = top_node->next;
+    delete temp;
+    return val;
+}`)}`,
+          options: [
+            "Pushes a new element onto the stack",
+            "Returns the top element without removing it",
+            "Pops (removes and returns) the top element",
+            "Deletes every node in the stack",
+          ],
+          answer: 2,
+          explain: `<p>In a linked-list stack the top of the stack is the first node. The function:</p>
+              <p>(1) remembers the top node in ${c("temp")}, (2) saves its value, (3) moves ${c("top_node")} down to the next node, (4) deletes the old top node, and (5) returns the saved value. That's <b>pop</b>.</p>
+              <p>It isn't ${c("top()")} because ${c("top()")} only <i>looks</i> at the top without removing it. It doesn't delete every node because there's no loop.</p>`,
+        },
+
+        {
+          type: "blanks",
+          pts: 1,
+          topic: "push and full()",
+          prompt: `<p>Complete ${c("push")} for the array-based stack (${c("StackArray")}) from Question 2.</p>${pre(`
+template <typename T, int capacity>
+void StackArray<T, capacity>::push(const T& val) {
+    if ( [ Answer 1 ] ) {
+        throw std::out_of_range("push: Full Stack");
+    }
+    else {
+        data[ [ Answer 2 ] ] = val;
+    }
+}`)}`,
+          blanks: [
+            {
+              label: "Answer 1",
+              shown: "full()",
+              accept: [
+                "full()",
+                "this->full()",
+                "top_idx==capacity-1",
+                "top_idx>=capacity-1",
+              ],
+            },
+            {
+              label: "Answer 2",
+              shown: "++top_idx",
+              accept: ["++top_idx", "++this->top_idx"],
+            },
+          ],
+          explain: `${pre(`if (full()) {
+    throw std::out_of_range("push: Full Stack");
+}
+else {
+    data[++top_idx] = val;
+}`)}<p>An array has a fixed size, so before adding, check there's room. If the stack is <b>full</b>, throw an error. Otherwise move ${c("top_idx")} up one spot and put the value there (same idea as Question 2).</p>
+              <p>A linked-list stack never needs a ${c("full()")} check, because it makes a new node whenever it needs one.</p>`,
+        },
+
+        {
+          type: "mc",
+          pts: 1,
+          topic: "Stack application",
+          prompt: `<p><b>Stack application.</b> A stack is used to evaluate this <b>postfix</b> expression. Read left to right. Push numbers. When you see an operator, pop two numbers, apply the operator, and push the result. What is the final result?</p>${pre("6 2 / 3 4 * +")}`,
+          options: ["15", "6", "24", "9"],
+          answer: 0,
+          explain: `<p>Numbers wait on the stack until an operator needs them. The first number popped is the <i>right</i> side (B), and the second is the <i>left</i> side (A). That order matters for / and -.</p>
+              <p>In normal notation this is (6 / 2) + (3 × 4) = 3 + 12 = <b>15</b>. Step through it:</p>`,
+          steps: [
+            ["Start: empty stack", [], ""],
+            ["read 6 → push", [6], ""],
+            ["read 2 → push", [6, 2], ""],
+            ["read / → B=2, A=6, push 6/2 = 3", [3], ""],
+            ["read 3 → push", [3, 3], ""],
+            ["read 4 → push", [3, 3, 4], ""],
+            ["read * → B=4, A=3, push 3*4 = 12", [3, 12], ""],
+            ["read + → B=12, A=3, push 3+12 = 15", [15], ""],
+            ["end → result = pop() = 15", [15], "15"],
+          ],
+          outLabel: "Result",
+        },
+
+        {
+          type: "match",
+          pts: 1,
+          topic: "Terminology & traversals",
+          prompt: `<p>Use this binary search tree. Match each item with its answer. Height counts <b>levels</b>, so a tree with a single node has height 1.</p>${treeSVG(false)}`,
+          choices: [
+            "10",
+            "3",
+            "4",
+            "13",
+            "5 7 8 10 11 12 13",
+            "10 7 5 8 12 11 13",
+            "5 8 7 11 13 12 10",
+          ],
+          rows: [
+            { label: "Root of the tree", answer: "10" },
+            { label: "Height of the tree", answer: "3" },
+            {
+              label: "Inorder traversal (left, root, right)",
+              answer: "5 7 8 10 11 12 13",
+            },
+            {
+              label: "Preorder traversal (root, left, right)",
+              answer: "10 7 5 8 12 11 13",
+            },
+          ],
+          explain: `<p><b>Root</b> = the top node, the only one with no parent: 10.</p>
+              <p><b>Height</b> = number of levels. Level 1 is {10}, level 2 is {7, 12}, level 3 is {5, 8, 11, 13}. So the height is 3.</p>
+              <p><b>Inorder</b> (left, root, right): in a BST this always prints the values <b>in sorted order</b>, which is a handy way to check that a tree really is a BST.</p>
+              <p><b>Preorder</b> (root, left, right): visit the node first, then its whole left side, then its right side. That gives 10, then 7 5 8, then 12 11 13.</p>
+              <p>The extra choice ${c("5 8 7 11 13 12 10")} is <b>postorder</b> (left, right, root), where the root is always last.</p>`,
+        },
+
+        {
+          type: "code",
+          pts: 2,
+          topic: "Searching a BST",
+          prompt: `<p>Implement ${c("contains")}. It should return ${c("true")} if ${c("val")} is in the tree and ${c("false")} otherwise. Use the BST rule to decide whether to go left or right.</p>${pre(`
+template <typename T>
+class BTNode {
+public:
+    T data;
+    BTNode<T>* left;
+    BTNode<T>* right;
+};
+
+template <typename T>
+class BST {
+public:
+    bool contains(const T& val) const;
+private:
+    BTNode<T>* root;
+};
+
+template <typename T>
+bool BST<T>::contains(const T& val) const {
+    // YOUR CODE GOES HERE
+}`)}`,
+          checks: [
+            ["Starts at the root", /root/],
+            ["Has a loop or recursion", /\bwhile\b|\bfor\b|contains\s*\(/],
+            ["Goes left somewhere", /->\s*left/],
+            ["Goes right somewhere", /->\s*right/],
+            ["Returns true when found", /return\s+true/],
+            ["Returns false when not found", /return\s+false/],
+          ],
+          model: `template <typename T>
+bool BST<T>::contains(const T& val) const {
+    const BTNode<T>* cur = root;      // start at the top
+
+    while (cur) {                     // stop if we fall off the tree
+        if (cur->data == val) {
+            return true;              // found it
+        }
+        else if (cur->data > val) {
+            cur = cur->left;          // val is smaller: go left
+        }
+        else {
+            cur = cur->right;         // val is bigger: go right
+        }
+    }
+    return false;                     // reached nullptr: not in tree
+}`,
+          explain: `<p>It works like the number-guessing game. Start at the root. If it's the value you want, you're done. If your value is <b>smaller</b>, it can only be on the <b>left</b>. If it's <b>bigger</b>, it can only be on the <b>right</b>. If you reach an empty spot (${c("nullptr")}), the value isn't in the tree.</p>
+              <p>${c("while (cur)")} also handles an empty tree. If ${c("root")} is ${c("nullptr")}, the loop never runs and the function returns ${c("false")}.</p>`,
+        },
+
+        {
+          type: "mc",
+          pts: 1,
+          topic: "BST insertion",
+          prompt: `<p>Starting with the tree from Question 7, these insertions run in order. Where do the new nodes end up?</p>${treeSVG(false)}${pre("insert(6);\ninsert(9);")}`,
+          options: [
+            "6 becomes the left child of 7; 9 becomes the left child of 10",
+            "6 becomes the right child of 5; 9 becomes the left child of 11",
+            "6 becomes the left child of 5; 9 becomes the right child of 8",
+            "6 becomes the right child of 5; 9 becomes the right child of 8",
+          ],
+          answer: 3,
+          explain: `<p>Insertion follows the same path as searching: smaller goes left, bigger goes right, until you reach an empty spot.</p>${pre(`insert(6):  6 < 10 go left  -> 7
+            6 < 7  go left  -> 5
+            6 > 5  go right -> empty!  6 is the right child of 5
+
+insert(9):  9 < 10 go left  -> 7
+            9 > 7  go right -> 8
+            9 > 8  go right -> empty!  9 is the right child of 8`)}${treeSVG(true)}
+              <p>New nodes always land at the bottom as a <b>leaf</b>. Existing nodes never move during a normal BST insert.</p>`,
+        },
+      ];
+
+      const TOTAL = Q.reduce((a, q) => a + q.pts, 0);
+      const KEY = "ds-quiz3-practice-v1";
+      let S = { cur: 0, ans: {}, checked: {}, score: {}, step: {}, view: "q" };
+      try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+        if (saved && saved.ans) S = Object.assign(S, saved);
+      } catch (e) {}
+      const save = () => {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(S));
+        } catch (e) {}
+      };
+
+      const norm = (s) =>
+        String(s || "")
+          .replace(/\s+/g, "")
+          .replace(/;$/, "")
+          .toLowerCase();
+      const fmt = (n) => (Math.round(n * 100) / 100).toString();
+
+      function status(i) {
+        if (!S.checked[i])
+          return S.ans[i] != null && S.ans[i] !== "" ? "answered" : "";
+        const q = Q[i],
+          sc = S.score[i];
+        if (sc == null) return "wait";
+        return sc >= q.pts ? "ok" : sc > 0 ? "part" : "bad";
+      }
+
+      function hasAnswer(i) {
+        const q = Q[i],
+          a = S.ans[i];
+        if (q.type === "mc") return a != null;
+        if (q.type === "text" || q.type === "code") return !!(a && a.trim());
+        if (q.type === "blanks" || q.type === "match")
+          return Array.isArray(a) && a.some((v) => v && String(v).trim());
+        return false;
+      }
+
+      function grade(i) {
+        const q = Q[i],
+          a = S.ans[i];
+        if (q.type === "mc") return a === q.answer ? q.pts : 0;
+        if (q.type === "text") return q.accept.includes(norm(a)) ? q.pts : 0;
+        if (q.type === "blanks")
+          return q.blanks.reduce(
+            (t, b, k) =>
+              t +
+              (b.accept.map(norm).includes(norm((a || [])[k]))
+                ? q.pts / q.blanks.length
+                : 0),
+            0,
+          );
+        if (q.type === "match")
+          return q.rows.reduce(
+            (t, r, k) =>
+              t + ((a || [])[k] === r.answer ? q.pts / q.rows.length : 0),
+            0,
+          );
+        return null; // code: self-scored
+      }
+
+      function renderRail() {
+        const rail = document.getElementById("rail");
+        rail.innerHTML =
+          Q.map(
+            (
+              q,
+              i,
+            ) => `<button class="chip ${status(i) === "wait" ? "answered" : status(i)}" data-go="${i}"
+     aria-current="${S.view === "q" && S.cur === i}" aria-label="Question ${i + 1}">${i + 1}</button>`,
+          ).join("") +
+          `<button class="chip results" data-go="results" aria-current="${S.view === "results"}">Results</button>`;
+        const got = Q.reduce(
+          (t, q, i) =>
+            t + (S.checked[i] && S.score[i] != null ? S.score[i] : 0),
+          0,
+        );
+        const possible = Q.reduce(
+          (t, q, i) => t + (S.checked[i] && S.score[i] != null ? q.pts : 0),
+          0,
+        );
+        document.getElementById("scoreSoFar").textContent = fmt(got);
+        document.getElementById("scorePossible").textContent = fmt(possible);
+      }
+
+      function stepperHTML(i) {
+        const q = Q[i],
+          k = Math.min(S.step[i] || 0, q.steps.length - 1);
+        const [op, stack, out] = q.steps[k];
+        const prev = k > 0 ? q.steps[k - 1][1] : [];
+        const boxes = stack
+          .map(
+            (v, j) =>
+              `<div class="box ${j === stack.length - 1 ? "top" : ""} ${j >= prev.length || prev[j] !== v ? "fresh" : ""}">${v}</div>`,
+          )
+          .join("");
+        return `<div class="stepper" aria-live="polite">
+    <div class="row"><div class="stack" aria-label="Stack contents, bottom to top: ${stack.join(", ") || "empty"}">${boxes}</div>
+      <div class="stepinfo"><div class="count">Step ${k + 1} of ${q.steps.length}</div><div class="op">${esc(op)}</div>
+      <div class="out">${q.outLabel || "Printed so far"}: <b>${esc(out) || "—"}</b></div></div></div>
+    <div class="actions"><button data-step="-1" ${k === 0 ? "disabled" : ""}>← Back</button><button class="primary" data-step="1" ${k === q.steps.length - 1 ? "disabled" : ""}>Next step →</button><button data-step="0">Restart</button></div>
+  </div>`;
+      }
+
+      function inputHTML(i, locked) {
+        const q = Q[i],
+          a = S.ans[i],
+          dis = locked ? "disabled" : "";
+        if (q.type === "mc") {
+          return `<div class="opts ${locked ? "locked" : ""}" role="radiogroup">${q.options
+            .map((o, k) => {
+              let cls = "",
+                tag = "";
+              if (locked && k === q.answer) {
+                cls = "correct";
+                tag = "Correct answer";
+              } else if (locked && k === a) {
+                cls = "wrong";
+                tag = "Your answer";
+              }
+              if (locked && k === q.answer && k === a) tag = "Your answer ✓";
+              return `<label class="opt ${cls}"><input type="radio" id="q${i}o${k}" name="q${i}" value="${k}" ${a === k ? "checked" : ""} ${dis}><span>${esc(o)}</span>${tag ? `<span class="tag">${tag}</span>` : ""}</label>`;
+            })
+            .join("")}</div>`;
+        }
+        if (q.type === "text") {
+          const cls = locked ? (grade(i) ? "correct" : "wrong") : "";
+          return `<div class="field"><label for="q${i}t">Your answer</label><input type="text" id="q${i}t" class="${cls}" value="${esc(a || "")}" ${dis} autocomplete="off" spellcheck="false">
+      ${locked && !grade(i) ? `<span class="fix">Correct: ${esc(q.shown)}</span>` : ""}</div>`;
+        }
+        if (q.type === "blanks") {
+          return q.blanks
+            .map((b, k) => {
+              const v = (a || [])[k] || "",
+                ok = b.accept.map(norm).includes(norm(v));
+              return `<div class="field"><label for="q${i}b${k}">${b.label}</label><input type="text" id="q${i}b${k}" data-k="${k}" class="${locked ? (ok ? "correct" : "wrong") : ""}" value="${esc(v)}" ${dis} autocomplete="off" spellcheck="false">
+        ${locked && !ok ? `<span class="fix">Correct: ${esc(b.shown)}</span>` : ""}</div>`;
+            })
+            .join("");
+        }
+        if (q.type === "match") {
+          return `<div class="match">${q.rows
+            .map((r, k) => {
+              const v = (a || [])[k] || "",
+                ok = v === r.answer;
+              return `<div class="mrow"><label for="q${i}m${k}">${esc(r.label)}</label><div><select id="q${i}m${k}" data-k="${k}" class="${locked ? (ok ? "correct" : "wrong") : ""}" ${dis}>
+        <option value="">Choose…</option>${q.choices.map((ch) => `<option ${ch === v ? "selected" : ""}>${esc(ch)}</option>`).join("")}</select>
+        ${locked && !ok ? `<div class="fix">Correct: ${esc(r.answer)}</div>` : ""}</div></div>`;
+            })
+            .join("")}</div>`;
+        }
+        if (q.type === "code") {
+          return `<label for="q${i}c" class="hint">Type your C++ here. Use spaces to indent.</label><textarea id="q${i}c" spellcheck="false" ${dis} placeholder="const BTNode<T>* cur = root;&#10;...">${esc(a || "")}</textarea>`;
+        }
+        return "";
+      }
+
+      function feedbackHTML(i) {
+        const q = Q[i],
+          sc = S.score[i];
+        let head = "",
+          body = "";
+        if (q.type === "code") {
+          const code = S.ans[i] || "";
+          head =
+            sc == null
+              ? `<h3>Compare with the model answer</h3>`
+              : `<h3 class="${sc >= q.pts ? "ok" : sc > 0 ? "part" : "bad"}">You gave yourself ${sc} / ${q.pts}</h3>`;
+          body = `<p class="hint">Quick check of your code. This only looks for key pieces, so read the model answer too.</p>
+      <ul class="checklist">${q.checks.map(([t, re]) => `<li class="${re.test(code) ? "hit" : ""}">${t}</li>`).join("")}</ul>
+      <p class="answer-line">Model answer (from your lecture notes):</p>${pre(q.model)}${q.explain}
+      <p class="answer-line">How did you do?</p>
+      <div class="selfscore">${[
+        [2, "2 · Mine works the same way"],
+        [1, "1 · Partly right"],
+        [0, "0 · Not yet"],
+      ]
+        .map(
+          ([v, t]) =>
+            `<button data-self="${v}" aria-pressed="${sc === v}">${t}</button>`,
+        )
+        .join("")}</div>`;
+        } else {
+          const label =
+            sc >= q.pts
+              ? ["ok", "Correct"]
+              : sc > 0
+                ? ["part", "Partly correct"]
+                : ["bad", "Not quite"];
+          head = `<h3 class="${label[0]}">${label[1]} · ${fmt(sc)} / ${q.pts} pts</h3>`;
+          body = q.explain + (q.steps ? stepperHTML(i) : "");
+        }
+        return `<section class="feedback" aria-live="polite">${head}${body}</section>`;
+      }
+
+      function renderQuestion() {
+        const i = S.cur,
+          q = Q[i],
+          locked = !!S.checked[i],
+          st = status(i);
+        const pill =
+          st === "ok"
+            ? `<span class="pill ok">Correct</span>`
+            : st === "bad"
+              ? `<span class="pill bad">Incorrect</span>`
+              : st === "part"
+                ? `<span class="pill part">Partial</span>`
+                : st === "wait"
+                  ? `<span class="pill wait">Self-score</span>`
+                  : "";
+        const ptsTxt =
+          locked && S.score[i] != null
+            ? `${fmt(S.score[i])} / ${q.pts} pts`
+            : `${q.pts} pt${q.pts > 1 ? "s" : ""}`;
+        document.getElementById("card").innerHTML = `
+    <div class="qhead"><div><h2>Question ${i + 1}</h2><div class="topic">${q.topic}</div></div><div class="qmeta">${pill}<span>${ptsTxt}</span></div></div>
+    <div class="qbody">${q.prompt}${inputHTML(i, locked)}
+      <div class="actions">
+        <button data-nav="-1" ${i === 0 ? "disabled" : ""}>← Previous</button>
+        <span class="spacer"></span>
+        ${locked ? "" : `<button class="primary" id="checkBtn" ${hasAnswer(i) ? "" : "disabled"}>Check answer</button>`}
+        <button data-nav="1" class="${locked ? "primary" : ""}">${i === Q.length - 1 ? "See results" : "Next →"}</button>
+      </div>
+      ${locked ? "" : `<div class="hint">${q.type === "code" ? "When you check, you'll see the model answer and score yourself." : "Pick or type an answer, then check it."}</div>`}
+    </div>
+    ${locked ? feedbackHTML(i) : ""}`;
+      }
+
+      function renderResults() {
+        const got = Q.reduce((t, q, i) => t + (S.score[i] || 0), 0);
+        const done = Q.filter((q, i) => S.checked[i]).length;
+        const rows = Q.map((q, i) => {
+          const st = status(i);
+          const label =
+            {
+              ok: "Correct",
+              bad: "Incorrect",
+              part: "Partial",
+              wait: "Needs self-score",
+            }[st] || "Not answered";
+          const cls =
+            { ok: "ok", bad: "bad", part: "part", wait: "wait" }[st] || "wait";
+          return `<div class="ritem"><span><b>Question ${i + 1}</b> <span class="pill ${cls}">${label}</span></span><span class="t">${q.topic}</span>
+      <span class="actions"><span class="p">${S.checked[i] && S.score[i] != null ? fmt(S.score[i]) : "–"} / ${q.pts}</span><button data-go="${i}">Review</button></span></div>`;
+        }).join("");
+        const msg =
+          done < Q.length
+            ? `You've checked ${done} of ${Q.length} questions. Unchecked questions count as 0.`
+            : got >= 9
+              ? "Excellent. You're ready for this material."
+              : got >= 7
+                ? "Solid. Review the questions you missed below."
+                : got >= 5
+                  ? "Getting there. Open the explanations for the missed questions and step through the examples."
+                  : "Keep going. Read each explanation, use the step-through, then retake the quiz.";
+        document.getElementById("card").innerHTML = `
+    <div class="qhead"><div><h2>Results</h2><div class="topic">Stacks &amp; Binary Trees practice</div></div></div>
+    <div class="results">
+      <div class="big">${fmt(got)} <small>out of ${TOTAL}</small></div>
+      <p>${msg}</p>
+      <div class="rlist">${rows}</div>
+      <div class="actions"><button data-go="0">Back to Question 1</button><span class="spacer"></span><button class="primary" id="retake">Retake quiz</button></div>
+    </div>`;
+      }
+
+      function render() {
+        renderRail();
+        S.view === "results" ? renderResults() : renderQuestion();
+        save();
+      }
+
+      document.addEventListener("click", (e) => {
+        const t = e.target.closest("button");
+        if (!t) return;
+        if (t.dataset.go != null) {
+          if (t.dataset.go === "results") S.view = "results";
+          else {
+            S.view = "q";
+            S.cur = +t.dataset.go;
+          }
+          render();
+          window.scrollTo({ top: 0 });
+          return;
+        }
+        if (t.dataset.nav) {
+          const n = S.cur + +t.dataset.nav;
+          if (n >= Q.length) S.view = "results";
+          else S.cur = Math.max(0, n);
+          render();
+          window.scrollTo({ top: 0 });
+          return;
+        }
+        if (t.id === "checkBtn") {
+          const i = S.cur;
+          S.checked[i] = true;
+          S.score[i] = grade(i);
+          render();
+          return;
+        }
+        if (t.dataset.self != null) {
+          S.score[S.cur] = +t.dataset.self;
+          render();
+          return;
+        }
+        if (t.dataset.step != null) {
+          const i = S.cur,
+            d = +t.dataset.step,
+            max = Q[i].steps.length - 1;
+          S.step[i] =
+            d === 0 ? 0 : Math.max(0, Math.min(max, (S.step[i] || 0) + d));
+          const fb = document.querySelector(".stepper");
+          if (fb) fb.outerHTML = stepperHTML(i);
+          save();
+          return;
+        }
+        if (t.id === "retake") {
+          S = { cur: 0, ans: {}, checked: {}, score: {}, step: {}, view: "q" };
+          render();
+          window.scrollTo({ top: 0 });
+        }
+      });
+
+      document.addEventListener("input", (e) => {
+        const el = e.target,
+          i = S.cur,
+          q = Q[i];
+        if (S.view !== "q" || S.checked[i]) return;
+        if (el.type === "radio") S.ans[i] = +el.value;
+        else if (q.type === "text" || q.type === "code") S.ans[i] = el.value;
+        else if (el.dataset.k != null) {
+          const arr = Array.isArray(S.ans[i]) ? S.ans[i] : [];
+          arr[+el.dataset.k] = el.value;
+          S.ans[i] = arr;
+        }
+        const b = document.getElementById("checkBtn");
+        if (b) b.disabled = !hasAnswer(i);
+        renderRail();
+        save();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
